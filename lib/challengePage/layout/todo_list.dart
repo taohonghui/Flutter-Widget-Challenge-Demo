@@ -17,27 +17,46 @@ class _TodoListWidgetState extends State<TodoListWidget> {
     '{"message":"唱歌","date":"10月27日"}'
   ];
 
-  Key _myKey;
+  List slideId = [];
+  List<SlideItem> slideItems=[];
+
   @override
   void initState() {
-//    getSlideButton();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
         appBar: AppBar(),
         body: ListView.separated(
             separatorBuilder: (BuildContext context, int index) =>
-                const Divider(),
+                const Divider(height: 1,),
             itemCount: data.length,
             itemBuilder: (context, i) {
               Map item = JsonDecoder().convert(data[i]);
-              return SlideItem(
+              if (slideId != null && slideId.length > 1) {
+                //close
+                print("第" +
+                    slideId[0].toString() +
+                    "在展开中，需要关闭" +
+                    slideId[0].toString() +
+                    "项");
+                print("新打开的项为" + slideId[1].toString());
+                slideItems[slideId[0]].state.close();
+
+                slideId.removeAt(0);
+              }
+              var slideItem = SlideItem(
+                  id: i,
+                  onSlideStart: (id) {
+                    print("第" + i.toString() + "展开");
+                    setState(() {
+                      slideId.add(id);
+                    });
+                  },
                   hideButtonWidth: 80,
-                  hideWidgets: getSlideButton(null,i),
+                  hideWidgets: getSlideButton(null, i),
                   slideWidget: Container(
                     height: MediaQuery.of(context).size.height / 10,
                     color: Colors.white,
@@ -81,22 +100,26 @@ class _TodoListWidgetState extends State<TodoListWidget> {
                       ],
                     ),
                   ));
+
+              if(!slideItems.contains(slideItem))
+              slideItems.add(slideItem);
+              return slideItem;
             }));
   }
 
-  List<Widget> getSlideButton(BuildContext context,int index) {
+  List<Widget> getSlideButton(BuildContext context, int index) {
     List<Widget> slideButtons = [];
 //    SlideItem.of(context).close();
     slideButtons.add(buildAction("置顶", Colors.black12, () {
-      print("子组件点击第"+index.toString()+"项");
+      print("子组件点击第" + index.toString() + "项");
       Fluttertoast.showToast(msg: "置顶");
     }));
     slideButtons.add(buildAction("已读", Colors.amberAccent, () {
-      print("子组件点击第"+index.toString()+"项");
+      print("子组件点击第" + index.toString() + "项");
       Fluttertoast.showToast(msg: "已读");
     }));
     slideButtons.add(buildAction("删除", Colors.red, () {
-      print("子组件点击第"+index.toString()+"项");
+      print("子组件点击第" + index.toString() + "项");
       setState(() {
         data.removeAt(index);
       });
@@ -120,7 +143,4 @@ class _TodoListWidgetState extends State<TodoListWidget> {
       ),
     );
   }
-
 }
-
-

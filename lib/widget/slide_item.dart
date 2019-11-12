@@ -4,16 +4,19 @@ import 'package:flutter/material.dart';
 class SlideItem extends StatefulWidget {
   VoidCallback onSlideComplete;
   VoidCallback onSlideCancel;
-  VoidCallback onSlideStart;
 
- final List<Widget> hideWidgets;
+  SlideCallback onSlideStart;
+
+  final List<Widget> hideWidgets;
 
   AnimationController animationController;
 
+  _SlideItemState state;
   Widget slideWidget;
 
   double hideButtonWidth;
 
+  int id;
 
   SlideItem(
       {Key key,
@@ -22,28 +25,16 @@ class SlideItem extends StatefulWidget {
       this.onSlideComplete,
       this.onSlideStart,
       this.onSlideCancel,
+      this.id,
       this.animationController,
       @required this.hideButtonWidth})
-      :
-        super(key: key);
+      : super(key: key);
 
   @override
-  SlideItemState createState() =>  SlideItemState();
-
-  static SlideItemState of(BuildContext context,{ bool nullOk = false }){
-    assert(nullOk != null);
-    assert(context != null);
-    final SlideItemState result = context.ancestorStateOfType(const TypeMatcher<SlideItemState>());
-    if (nullOk || result != null)
-      return result;
-    throw FlutterError(
-       '使用了非法的上下文调用of'
-    );
-  }
-
+  _SlideItemState createState() => state = _SlideItemState();
 }
 
-class SlideItemState extends State<SlideItem> with TickerProviderStateMixin {
+class _SlideItemState extends State<SlideItem> with TickerProviderStateMixin {
   double maxDragDistance;
 
   double translateX = 0;
@@ -135,7 +126,7 @@ class SlideItemState extends State<SlideItem> with TickerProviderStateMixin {
   }
 
   void onHorizontalDragDown(DragDownDetails details) {
-    if (widget.onSlideStart != null) widget.onSlideStart.call();
+    if (widget.onSlideStart != null) widget.onSlideStart.call(widget.id);
   }
 
   void onHorizontalDragUpdate(DragUpdateDetails details) {
@@ -182,5 +173,6 @@ class SlideItemState extends State<SlideItem> with TickerProviderStateMixin {
     super.dispose();
   }
 }
-typedef ItemWidgetBuilder = List<Widget> Function(BuildContext context);
 
+typedef ItemWidgetBuilder = List<Widget> Function(BuildContext context);
+typedef SlideCallback = void Function(int id);
